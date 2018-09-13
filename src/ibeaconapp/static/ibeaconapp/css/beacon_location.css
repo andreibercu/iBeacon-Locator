@@ -1,0 +1,24 @@
+#floormap {
+    border:1px solid #000000;
+}
+
+.measurements-info {
+  margin-bottom: 40px;
+}
+
+.measurements-name {
+  margin-bottom:15px;
+}
+
+.figure-caption {
+  margin: 20px;
+}
+
+.alert-success h6 {
+  display: inline;
+}
+
+.alert-success #auto-refresh {
+  display: inline;
+  float: right;
+}

@@ -1,0 +1,128 @@
+{% extends "ibeaconapp/base.html" %}
+
+{% block css %}
+{% endblock css %}
+
+{% block container %}
+
+<div class='alert alert-secondary'><strong> Experiment using 3 beacons - Room 3</strong></div>
+
+<figure class='figure-caption'>
+<canvas class='floormap' id='map1beacon' ></canvas>
+</figure>
+
+
+{% endblock container %}
+
+{% block scripts %}
+<script>
+
+function drawPoint(ctx, x, y, color){
+    fill_r = 9;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x,y,fill_r,0,2*Math.PI);
+    ctx.fill();
+    ctx.closePath();
+};
+
+function drawPointGroup(ctx, x, y, color1, color2, color3){
+    drawPoint(ctx, x - offset, y - offset, color1); // b1 - E68D
+    drawPoint(ctx, x         , y         , color2); // b2 - 465E
+    drawPoint(ctx, x - offset, y + offset, color3); // b3 - 8271
+};
+
+function drawReceptor(ctx, x, y, color){
+    fill_r = 18;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x,y,fill_r,0.5 * Math.PI,1.5 *Math.PI);
+    ctx.fill();
+    ctx.closePath();
+};
+
+
+var canvas = document.getElementById("map1beacon");
+
+window.onload = function() {
+    // set floor map width and height
+    var ctx = canvas.getContext("2d");
+    var map_x_meters = "{{floor_map.length}}"
+    var map_y_meters = "{{floor_map.width}}"
+    var map_y_px = 800;
+    var px_permeter = map_y_px / map_y_meters;
+    var map_x_px = map_x_meters * px_permeter;
+
+    canvas.setAttribute("width", map_x_px);
+    canvas.setAttribute("height", map_y_px);
+    
+    {% if floor_map.image %}
+    canvas.style.background = "url('{{floor_map.image.url}}')";
+    canvas.style.backgroundSize = "100% 100%";
+    {% else %}
+    canvas.style.backgroundColor = "PeachPuff";
+    {% endif %}
+
+    // draw receptors
+    color_r1 = 'Blue';
+    color_r2 = 'Green';
+    color_r3 = 'Brown';
+    drawReceptor(ctx, 485, 200, color_r1);
+    drawReceptor(ctx, 485, 430, color_r2);
+    drawReceptor(ctx, 485, 640, color_r3);
+
+    // draw points
+    ctx.fillStyle = 'Red';
+
+    x_start = 180;
+    x_interval = 90;
+
+    offset = 15;
+
+    // sufragerie
+    drawPointGroup(ctx, x_start                 , 120, color_r1, color_r1, color_r1); // p01
+    drawPointGroup(ctx, x_start + 1 * x_interval, 120, color_r1, color_r1, color_r1); // p02
+    drawPointGroup(ctx, x_start + 2 * x_interval, 120, color_r1, color_r1, color_r1); // p03
+    drawPointGroup(ctx, x_start + 3 * x_interval, 120, color_r1, color_r1, color_r1); // p04
+    drawPointGroup(ctx, x_start                 , 200, color_r1, color_r1, color_r1); // p05
+    drawPointGroup(ctx, x_start + 1 * x_interval, 200, color_r1, color_r1, color_r1); // p06
+    drawPointGroup(ctx, x_start + 2 * x_interval, 200, color_r1, color_r1, color_r1); // p07
+    drawPointGroup(ctx, x_start + 3 * x_interval, 200, color_r1, color_r1, color_r1); // p08
+    drawPointGroup(ctx, x_start                 , 280, color_r1, color_r1, color_r1); // p09
+    drawPointGroup(ctx, x_start + 1 * x_interval, 280, color_r1, color_r1, color_r1); // p10
+    drawPointGroup(ctx, x_start + 2 * x_interval, 280, color_r1, color_r1, color_r1); // p11
+    drawPointGroup(ctx, x_start + 3 * x_interval, 280, color_r1, color_r1, color_r1); // p12
+
+    // dormitor
+    drawPointGroup(ctx, x_start                 , 350, color_r1, color_r1, color_r1); // p13
+    drawPointGroup(ctx, x_start + 1 * x_interval, 350, color_r2, color_r2, color_r2); // p14
+    drawPointGroup(ctx, x_start + 2 * x_interval, 350, color_r1, color_r1, color_r1); // p15
+    drawPointGroup(ctx, x_start + 3 * x_interval, 350, color_r2, color_r2, color_r2); // p16
+    drawPointGroup(ctx, x_start                 , 430, color_r2, color_r1, color_r1); // p17
+    drawPointGroup(ctx, x_start + 1 * x_interval, 430, color_r2, color_r2, color_r2); // p18
+    drawPointGroup(ctx, x_start + 2 * x_interval, 430, color_r2, color_r2, color_r2); // p19
+    drawPointGroup(ctx, x_start + 3 * x_interval, 430, color_r2, color_r2, color_r2); // p20
+    drawPointGroup(ctx, x_start                 , 510, color_r3, color_r2, color_r2); // p21
+    drawPointGroup(ctx, x_start + 1 * x_interval, 510, color_r2, color_r2, color_r2); // p22
+    drawPointGroup(ctx, x_start + 2 * x_interval, 510, color_r2, color_r1, color_r3); // p23
+    drawPointGroup(ctx, x_start + 3 * x_interval, 510, color_r2, color_r2, color_r2); // p24
+
+    // bucatarie si baie
+    drawPointGroup(ctx, x_start                 , 580, color_r3, color_r3, color_r3); // p25
+    drawPointGroup(ctx, x_start + 1 * x_interval, 580, color_r3, color_r3, color_r3); // p26
+    drawPointGroup(ctx, x_start + 2 * x_interval, 580, color_r3, color_r3, color_r3); // p27
+    drawPointGroup(ctx, x_start + 3 * x_interval, 580, color_r3, color_r3, color_r3); // p28
+    drawPointGroup(ctx, x_start - x_interval    , 670, color_r3, color_r3, color_r3); // p29
+    drawPointGroup(ctx, x_start                 , 670, color_r3, color_r3, color_r3); // p30
+    drawPointGroup(ctx, x_start + 1 * x_interval, 640, color_r3, color_r3, color_r3); // p31
+    drawPointGroup(ctx, x_start + 2 * x_interval, 640, color_r3, color_r3, color_r3); // p32
+    drawPointGroup(ctx, x_start + 3 * x_interval, 640, color_r3, color_r3, color_r3); // p33
+    drawPointGroup(ctx, x_start + 1 * x_interval, 700, color_r3, color_r3, color_r3); // p36
+    drawPointGroup(ctx, x_start + 2 * x_interval, 700, color_r3, color_r3, color_r3); // p37
+    drawPointGroup(ctx, x_start + 3 * x_interval, 700, color_r3, color_r3, color_r3); // p38
+
+}
+
+
+</script>
+{% endblock scripts %}

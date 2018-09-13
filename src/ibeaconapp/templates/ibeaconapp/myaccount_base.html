@@ -1,0 +1,30 @@
+{% extends "ibeaconapp/base.html" %}
+
+{% block css %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'ibeaconapp/css/myaccount_base.css' %}">
+
+{% block myaccount_css %}{% endblock %}
+
+{% endblock css %}
+
+{% block container %}
+
+<p class='alert alert-secondary'><strong> My Account </strong></p>
+
+<div class='row'>
+    <div class='col-3'>
+        <ul id='navbar'>
+            <li><a href='{% url "beacons:myaccount-map-list" %}' id='maps'>My Floor Maps</a></li>
+            <li><a href='{% url "beacons:myaccount-beacon-list" %}' id='beacons'>My Beacons</a></li>
+            <li><a href='{% url "beacons:myaccount-node-list" %}' id='nodes'>My Nodes</a></li>
+        </ul>
+    </div>
+    <div class='col-9'>
+        <div style='min-height: 600px;'>
+        {% block list_div %}{% endblock list_div %}
+        </div>
+    </div>
+</div>
+
+{% endblock container %}
