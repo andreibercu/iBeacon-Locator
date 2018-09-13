@@ -1,0 +1,12 @@
+ul#navbar li a#maps {
+    background-color: #417690;
+    color: white;
+}
+
+#list-header p {
+  display:inline;
+}
+
+#list-header a {
+  float:right;
+}

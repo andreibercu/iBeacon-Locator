@@ -1,0 +1,18 @@
+ul#navbar {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    background-color: #f1f1f1;
+}
+
+ul#navbar li a {
+    display: block;
+    color: #000;
+    padding: 8px 16px;
+    text-decoration: none;
+}
+
+ul#navbar li a:hover {
+    background-color: #555;
+    color: white;
+}

@@ -1,0 +1,20 @@
+{% extends "ibeaconapp/base.html" %}
+
+{% block container %}
+
+<h2> Register </h2>
+<div class='col-sm-6 col-sm-offset-3 text-center'>
+
+<form method="post" action='{% url "registration_register" %}'>
+{% csrf_token %}
+<table>
+{{ form.as_table }}
+</table>
+
+<input type="submit" value="register" />
+<input type="hidden" name="next" value="{{ next }}" />
+</form>
+
+<p>Did you need to <a href='{% url "login" %}'> Login </a>?</p>
+</div>
+{% endblock %}

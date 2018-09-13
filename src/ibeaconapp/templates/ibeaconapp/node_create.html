@@ -1,0 +1,15 @@
+{% extends "ibeaconapp/base.html" %}
+
+{% block container %}
+
+<h5 class='alert alert-secondary'> {{ title }} </h5>
+
+{% if form.errors.non_field_errors %}
+{{ form.errors.non_field_errors }}
+{% endif %}
+<form method='POST'> {% csrf_token %}
+    {{ form.as_p }}
+    <button type='submit'>Save</button>
+</form>
+
+{% endblock container %}

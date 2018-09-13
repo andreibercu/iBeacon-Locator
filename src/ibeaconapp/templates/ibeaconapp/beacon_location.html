@@ -1,0 +1,163 @@
+{% extends "ibeaconapp/base.html" %}
+
+{% block css %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'ibeaconapp/css/beacon_location.css' %}">
+{% endblock css %}
+
+{% block container %}
+
+<h6 class='alert alert-secondary'> Beacon {{beacon.id}} (uuid: {{beacon.uuid}}, major: {{beacon.majorid}}, minor: {{beacon.minorid}})</h6>
+<div class='alert alert-success'>
+<h6>Beacon Location: x={{location.x|floatformat:2}}, y={{location.y|floatformat:2}} meters</h6>
+<div id="auto-refresh" align="right">
+    <label> Auto Refresh </label>
+    <select id="auto-refresh-options">
+        <option value="on"> on </option>
+        <option value="off"> off </option>
+    </select>
+</div>
+</div>
+
+<figure class='figure-caption' align='center'>
+  <div>Floor Map: '{{ floor_map.name }}', size {{floor_map.length}} x {{floor_map.width}} meters, signal loss factor: {{floor_map.nconst}}</div>
+  <canvas id="floormap"></canvas>
+  <div id="coordinates">Coordinates:</div>
+</figure>
+
+<div class='measurements-info'> 
+<h6 class='measurements-name'>Measurements Information:</h6>
+<table class='table table-sm table-striped'>
+  <tr>
+    <th> Node </th>
+    <th> Location X x Y (meters) </th>
+    <th> RSSI at 1m (dB) </th>
+    <th> Calculated Distance (meters) </th>
+    <th> RSSI Values </th>
+    <th> First Value </th>
+    <th> Last Value </th>
+  </tr>
+  {% for node_name, node_dict in measurements.items %}
+  <tr>
+    <td> {{node_name}} </td>
+    <td> {{node_dict.node_x_loc|default_if_none:"-"}} x {{node_dict.node_y_loc|default_if_none:"-"}} </td>
+    <td> {{node_dict.rssi_1m|default_if_none:"-"}} </td>
+    <td> {{node_dict.distance|default_if_none:"-"}} </td>
+    <td> {{node_dict.count|default:"-"}} </td>
+    <td> {{node_dict.first|default_if_none:"-"}} </td>
+    <td> {{node_dict.last|default_if_none:"-"}} </td>
+  </tr>
+  {% endfor %}
+</table>
+</div>
+
+{% endblock container %}
+
+{% block scripts %}
+<script>
+var canvas = document.getElementById("floormap");
+
+window.onload = function() {
+    // set floor map width and height
+    var ctx = canvas.getContext("2d");
+    var map_x_meters = "{{floor_map.length}}"
+    var map_y_meters = "{{floor_map.width}}"
+    var map_y_px = 500;
+    var px_permeter = map_y_px / map_y_meters;
+    var map_x_px = map_x_meters * px_permeter;
+
+    canvas.setAttribute("width", map_x_px);
+    canvas.setAttribute("height", map_y_px);
+    
+    {% if floor_map.image %}
+    canvas.style.background = "url('{{floor_map.image.url}}')";
+    canvas.style.backgroundSize = "100% 100%";
+    {% else %}
+    canvas.style.backgroundColor = "PeachPuff";
+    {% endif %}
+
+    var fill_r = 9
+
+    // draw nodes on the map that didn't detect the beacon 
+    ctx.fillStyle = "Grey";
+    useless_nodes_str = unescape("{{useless_nodes_json|safe|escapejs}}");
+    useless_nodes = JSON.parse(useless_nodes_str);
+    for (node_name in useless_nodes){
+        var x_px = useless_nodes[node_name]['x'] * px_permeter;
+        var y_px = map_y_px - (useless_nodes[node_name]['y'] * px_permeter);
+        ctx.beginPath();
+        ctx.arc(x_px,y_px,fill_r,0,2*Math.PI);
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    // draw nodes on the map that detected the beacon
+    ctx.fillStyle = "RoyalBlue";
+    var locator_nodes_str = unescape("{{locator_nodes_json|safe|escapejs}}");
+    var locator_nodes = JSON.parse(locator_nodes_str);
+    for (var node_name in locator_nodes){
+        if(locator_nodes.hasOwnProperty(node_name)){
+            var x_px = locator_nodes[node_name]['x'] * px_permeter;
+            var y_px = map_y_px - (locator_nodes[node_name]['y'] * px_permeter);
+            var r_px = locator_nodes[node_name]['distance'] * px_permeter;
+
+            // draw nodes center
+            ctx.beginPath();
+            ctx.arc(x_px,y_px,fill_r,0,2*Math.PI);
+            ctx.fill();
+            ctx.closePath();
+
+            // draw circle with r = calculated distance between the node and the beacon
+            ctx.beginPath();
+            ctx.arc(x_px,y_px,r_px,0,2*Math.PI);
+            ctx.stroke();
+            ctx.closePath();
+        }
+    }
+
+    // draw beacon at the calculated location
+    var location_x = {{location.x|default:"null"}};
+    var location_y = {{location.y|default:"null"}};
+    if( (location_x !== null) && (location_y !== null)){
+        ctx.fillStyle = "Red";
+        var x_px = location_x * px_permeter;
+        var y_px = map_y_px - (location_y * px_permeter);
+
+        ctx.beginPath();
+        ctx.arc(x_px,y_px,fill_r,0,2*Math.PI);
+        ctx.fill();
+        ctx.closePath();
+    }
+};
+
+canvas.addEventListener('mousemove', function(e){
+    var rect = canvas.getBoundingClientRect();
+    var map_x_px = canvas.getAttribute("width");
+    var map_y_px = canvas.getAttribute("height")
+    var px_permeter = map_x_px / "{{floor_map.length}}"
+    
+    var mouse_x_px=e.clientX - rect.left;
+    var mouse_y_px=map_y_px - (e.clientY - rect.top);
+
+    var mouse_x_meters = mouse_x_px / px_permeter;
+    var mouse_y_meters = mouse_y_px / px_permeter;
+    
+    var message = "Coordinates: x=" + mouse_x_meters.toFixed(2) + ", y=" + mouse_y_meters.toFixed(2) + " meters";
+    
+    document.getElementById("coordinates").innerHTML = message;
+}, false);
+
+canvas.addEventListener('mouseout', function(e){
+    document.getElementById("coordinates").innerHTML="Coordinates:";
+}, false);
+
+// auto refresh
+window.setInterval('refresh()', 10000);
+function refresh() {
+    var refreshSelect = document.getElementById('auto-refresh-options');
+    if(refreshSelect.value == "on"){
+        window.location.reload(true);
+    }
+}
+</script>
+{% endblock scripts %}

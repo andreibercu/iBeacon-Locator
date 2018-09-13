@@ -1,0 +1,25 @@
+{% extends "ibeaconapp/base.html" %}
+{% extends "ibeaconapp/myaccount_base.html" %}
+
+<style>
+
+ul#navbar li a#maps {
+    background-color: #417690;
+    color: white;
+}
+</style>
+
+{% block list_div %}
+
+<p align='center'><strong> Floor Maps </strong></p>
+{% if object_list %}
+    <ul>
+    {% for object in object_list %}
+        <li><a href='{% url "beacons:map-edit" pk=object.pk %}'><p>{{object.name}}</p></a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No maps found.</p>
+{% endif %}
+
+{% endblock list_div %}

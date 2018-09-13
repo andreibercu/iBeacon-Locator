@@ -1,0 +1,34 @@
+{% extends "ibeaconapp/base.html" %}
+
+{% block container %}
+
+<div class='alert alert-secondary'><strong> All Nodes </strong></div>
+
+{% if object_list %}
+<table class='table table-sm table-hover'>
+    <thead class='thead-light'>
+    <tr>
+        <th> Name </th>
+        <th> Floor Map </th>
+        <th> Location X x Y (meters) </th>
+        <th> RSSI at 1m (dB) </th>
+        <th> Owner </th>
+        <th> Added </th>
+    </tr>
+    </thead>
+{% for object in object_list %}
+    <tr>
+        <td> {{object.name}} </td>
+        <td> {{object.floor_map|default:"-"}} </td>
+        <td> {{object.x_loc|floatformat:2|default:"-"}} x {{object.y_loc|floatformat:2|default:"-"}} </td>
+        <td> {{object.rssi_1m}} </td>
+        <td> {{object.owner}} </td>
+        <td> {{object.created}} </td>
+    </tr>
+{% endfor %}
+</table>
+{% else %}
+    <p>No nodes found.</p>
+{% endif %}
+
+{% endblock container %}

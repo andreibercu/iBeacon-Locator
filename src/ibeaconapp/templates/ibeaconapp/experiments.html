@@ -1,0 +1,182 @@
+{% extends "ibeaconapp/base.html" %}
+
+{% block css %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'ibeaconapp/css/experiments.css' %}">
+{% endblock css %}
+
+{% block container %}
+
+<div class='experiments-module'>
+<div class='alert alert-secondary'><strong> Experiments using 3 nodes - Average Error: {{avg_error_3nodes|floatformat:2}} meters</strong></div>
+<div class='row'>
+    <div class='col'>
+    <table class='table table-sm table-striped'>
+      <tr>
+        <th> Expected x </th>
+        <th> Expected y </th>
+        <th> Measured x </th>
+        <th> Measured y </th>
+        <th> Error </th>
+      </tr>
+      {% for experiment in experiments_3nodes %}
+      <tr>
+        <td> {{experiment.expected.x|floatformat:2}} </td>
+        <td> {{experiment.expected.y|floatformat:2}} </td>
+        <td> {{experiment.actual.x|floatformat:2}} </td>
+        <td> {{experiment.actual.y|floatformat:2}} </td>
+        <td> {{experiment.error|floatformat:2}}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    </div>
+    
+    <div class='col'>
+        <figure class='figure-caption'>
+        <div> Map size: {{ map_3nodes.width }} x {{map_3nodes.height}} meters </div> 
+        <canvas class='floormap' id='map3nodes' ></canvas>
+        <div id='coords3nodes' >Coordinates:</div>
+        </figure>
+    </div>
+</div>
+</div>
+
+<div class='experiments-module'>
+<div class='alert alert-secondary'><strong> Experiments using 4 nodes - Average Error: {{avg_error_4nodes|floatformat:2}} meters</strong></div>
+<div class='row'>
+    <div class='col'>
+    <table class='table table-sm table-striped'>
+      <tr>
+        <th> Expected x </th>
+        <th> Expected y </th>
+        <th> Measured x </th>
+        <th> Measured y </th>
+        <th> Error </th>
+      </tr>
+      {% for experiment in experiments_4nodes %}
+      <tr>
+        <td> {{experiment.expected.x|floatformat:2}} </td>
+        <td> {{experiment.expected.y|floatformat:2}} </td>
+        <td> {{experiment.actual.x|floatformat:2}} </td>
+        <td> {{experiment.actual.y|floatformat:2}} </td>
+        <td> {{experiment.error|floatformat:2}}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    </div>
+    
+    <div class='col'>
+        <figure class='figure-caption'>
+        <div> Map size: {{ map_4nodes.width }} x {{map_4nodes.height}} meters </div>
+        <canvas class='floormap' id='map4nodes' ></canvas>
+        <div id='coords4nodes' >Coordinates:</div>
+        </figure>
+    </div>
+</div>
+</div>
+
+{% endblock container %}
+
+{% block scripts %}
+<script>
+var canvas_3nodes = document.getElementById("map3nodes");
+var canvas_4nodes = document.getElementById("map4nodes");
+
+var experiments_3nodes_str = unescape("{{experiments_3nodes_json|safe|escapejs}}");
+var experiments_3nodes = JSON.parse(experiments_3nodes_str);
+var experiments_4nodes_str = unescape("{{experiments_4nodes_json|safe|escapejs}}");
+var experiments_4nodes = JSON.parse(experiments_4nodes_str);
+
+var map_3nodes_str = unescape("{{map_3nodes_json|safe|escapejs}}");
+var map_3nodes = JSON.parse(map_3nodes_str);
+var map_4nodes_str = unescape("{{map_4nodes_json|safe|escapejs}}");
+var map_4nodes = JSON.parse(map_4nodes_str);
+
+var coords3nodes = document.getElementById("coords3nodes");
+var coords4nodes = document.getElementById("coords4nodes");
+
+function drawExperiments(canvas, experiments, map_x_meters, map_y_meters){
+    // set floor map width and height
+    var ctx = canvas.getContext("2d");
+    var map_y_px = 350;
+    var px_permeter = map_y_px / map_y_meters;
+    var map_x_px = map_x_meters * px_permeter;
+
+    canvas.setAttribute("width", map_x_px);
+    canvas.setAttribute("height", map_y_px);
+    
+    canvas.style.backgroundColor = "PeachPuff"
+
+    var fill_r = 5
+    
+    // draw experiments
+    for (i in experiments){
+        //draw expected location point
+        expected_x_px = experiments[i]['expected']['x'] * px_permeter;
+        expected_y_px = map_y_px - (experiments[i]['expected']['y'] * px_permeter);
+        ctx.fillStyle = "Green";
+        ctx.beginPath();
+        ctx.arc(expected_x_px,expected_y_px,fill_r,0,2*Math.PI);
+        ctx.fill();
+        ctx.closePath();
+        
+        //draw actual location point
+        actual_x_px = experiments[i]['actual']['x'] * px_permeter;
+        actual_y_px = map_y_px - (experiments[i]['actual']['y'] * px_permeter);
+        ctx.fillStyle = "Red";
+        ctx.beginPath();
+        ctx.arc(actual_x_px,actual_y_px,fill_r,0,2*Math.PI);
+        ctx.fill();
+        ctx.closePath();
+    
+        //draw a line between the 2 locations
+        ctx.moveTo(expected_x_px, expected_y_px);
+        ctx.lineTo(actual_x_px, actual_y_px);
+        ctx.stroke();
+    }
+};
+
+function showCoordinates(e, canvas, map_x_meters, textdiv){
+    var rect = canvas.getBoundingClientRect();
+    var map_x_px = canvas.getAttribute("width");
+    var map_y_px = canvas.getAttribute("height")
+    var px_permeter = map_x_px / map_x_meters;
+    
+    var mouse_x_px=e.clientX - rect.left;
+    var mouse_y_px=map_y_px - (e.clientY - rect.top);
+
+    var mouse_x_meters = mouse_x_px / px_permeter;
+    var mouse_y_meters = mouse_y_px / px_permeter;
+    
+    var message = "Coordinates: x=" + mouse_x_meters.toFixed(2) + ", y=" + mouse_y_meters.toFixed(2) + " meters";
+
+    textdiv.innerHTML = message
+};
+
+window.onload = function() {
+    drawExperiments(
+        canvas_3nodes, experiments_3nodes, 
+        map_3nodes['width'], map_3nodes['height']);
+    drawExperiments(
+        canvas_4nodes, experiments_4nodes,
+        map_4nodes['width'], map_4nodes['height']);
+};
+
+canvas_3nodes.addEventListener('mousemove', function(e){
+    showCoordinates(e, canvas_3nodes, map_3nodes['width'], coords3nodes)
+}, false);
+
+canvas_3nodes.addEventListener('mouseout', function(e){
+    coords3nodes.innerHTML="Coordinates:";
+}, false);
+
+canvas_4nodes.addEventListener('mousemove', function(e){
+    showCoordinates(e, canvas_4nodes, map_4nodes['width'], coords4nodes)
+}, false);
+
+canvas_4nodes.addEventListener('mouseout', function(e){
+    coords4nodes.innerHTML="Coordinates:";
+}, false);
+
+</script>
+{% endblock scripts %}

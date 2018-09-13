@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Bootstrap meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<!-- Bootstrap CSS -->
+{% load static %}
+<link rel="stylesheet" href="{% static 'bootstrap-4.0.0-dist/css/bootstrap.min.css' %}"/>
+
+<link rel="stylesheet" type="text/css" href="{% static 'ibeaconapp/css/base.css' %}">
+
+{% block css %}{% endblock css %}
+
+</head>
+<body>
+<div class='container'>
+
+<div class='alert alert-primary'>
+  <h3> Beacon Locator </h3>
+  <nav class='navbar-text'>
+    <a href='{% url "beacons:beacon-list" %}' class='btn'><strong>Beacons</strong></a>
+    <a href='{% url "beacons:map-list" %}' class='btn'><strong>Maps</strong></a>
+    <a href='{% url "beacons:node-list" %}' class='btn'><strong>Nodes</strong></a>
+    <a href='{% url "beacons:experiments" %}' class='btn'><strong>Experiments</strong></a>
+    <a href='{% url "beacons:myaccount" %}' class='btn'><strong>My Account</strong></a>
+  </nav>
+</div>
+
+{% block container %}{% endblock %}
+
+</div>
+
+{% block scripts %}{% endblock scripts %}
+</body>
+</html>

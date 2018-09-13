@@ -1,0 +1,42 @@
+{% extends "ibeaconapp/myaccount_base.html" %}
+
+{% block myaccount_css %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'ibeaconapp/css/myaccount_node_list.css' %}">
+{% endblock myaccount_css %}
+
+{% block list_div %}
+
+<div class='alert' id='list-header'>
+<p align='center'><strong> Select node to change </strong></p>
+<a href='{% url "beacons:node-create" %}' class='badge-pill badge-info'><strong> Add Node </strong></a>
+</div>
+
+{% if object_list %}
+<table class='table table-sm table-hover'>
+    <thead class='thead-light'>
+    <tr>
+        <th> Name </th>
+        <th> Floor Map </th>
+        <th> Location X x Y (meters) </th>
+        <th> RSSI at 1m (dB)</th>
+        <th/>
+        <th/>
+    </tr>
+    </thead>
+{% for object in object_list %}
+    <tr>
+        <td> {{object.name}} </td>
+        <td> {{object.floor_map|default:"-"}} </td>
+        <td> {{object.x_loc|floatformat:2|default:"-"}} x {{object.y_loc|floatformat:2|default:"-"}} </td>
+        <td> {{object.rssi_1m|floatformat:2|default:"-"}} </td>
+        <td><a href='{% url "beacons:node-edit" pk=object.pk %}' class='badge-pill badge-warning'> edit </a></td>
+        <td><a href='#' class='badge-pill badge-danger'> delete </a></td>
+    </tr>
+{% endfor %}
+</table>
+{% else %}
+    <p>No nodes found.</p>
+{% endif %}
+
+{% endblock list_div %}

@@ -1,0 +1,17 @@
+{% extends "ibeaconapp/base.html" %}
+
+{% block container %}
+
+<h5 class='alert alert-secondary'> Floor Maps </h5>
+
+{% if object.image %}
+<p> <img src="{{object.image.url}}" width="300"> </p>
+{% endif %}
+<p> Name: {{object.name}} </p>
+<p> Signal Loss Factor: {{object.nconst|floatformat:2|default:"-"}} </p>
+<p> Length: {{object.length|floatformat:2|default:"-"}} </p>
+<p> Width: {{object.width|floatformat:2|default:"-"}} </p>
+<p> Owner: {{object.owner}} </p>
+<p> Created at: {{object.created}} </p>
+
+{% endblock container %}

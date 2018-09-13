@@ -1,0 +1,21 @@
+.alert-primary {
+  margin-bottom: 5px;
+  background-color: #417690;
+  color: white;
+}
+
+.alert-primary h3 {
+  display:inline;
+}
+
+.alert-primary nav {
+  float:right;
+}
+
+.alert-primary nav a {
+  color: white;
+}
+
+.alert-primary nav a:hover {
+    color: #555;
+}
